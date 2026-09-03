@@ -11,24 +11,16 @@ function logger(req, res, next) {
 
 app.use(logger);
 
+async function getOrders() {
+  const data = await readFile("./data.json", "utf-8");
+  return JSON.parse(data);
+}
+
 app.get("/orders", async (req, res, next) => {
   try {
     const { status } = req.query;
-    const validStatus = [
-      "delivered",
-      "shipped",
-      "processing",
-      "pending",
-      "refunded",
-      "cancelled",
-    ];
 
-    const data = await readFile("./data.json", "utf-8");
-    const orders = JSON.parse(data);
-
-    if (sttaus && !validStatus.includes(status)) {
-      return res.json(400).json({ error: "Please enter a valid status" });
-    }
+    const orders = await getOrders();
 
     if (status) {
       const filtered = orders.filter((o) => o.status === status);
@@ -44,9 +36,7 @@ app.get("/orders", async (req, res, next) => {
 app.get("/orders/:id", async (req, res, next) => {
   try {
     const { id } = req.params;
-    const data = await readFile("./data.json", "utf-8");
-    const orders = JSON.parse(data);
-
+    const orders = await getOrders();
     const order = orders.find((o) => o.id === id);
 
     if (!order)
