@@ -4,6 +4,13 @@ import { readFile } from "fs/promises";
 const app = express();
 const PORT = 3000;
 
+function logger(req, res, next) {
+  console.log(`${req.method} ${req.url}`);
+  next();
+}
+
+app.use(logger);
+
 app.get("/orders", async (req, res, next) => {
   try {
     const data = await readFile("./data.json", "utf-8");
