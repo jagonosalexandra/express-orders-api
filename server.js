@@ -13,8 +13,28 @@ app.use(logger);
 
 app.get("/orders", async (req, res, next) => {
   try {
+    const { status } = req.query;
+    const validStatus = [
+      "delivered",
+      "shipped",
+      "processing",
+      "pending",
+      "refunded",
+      "cancelled",
+    ];
+
     const data = await readFile("./data.json", "utf-8");
     const orders = JSON.parse(data);
+
+    if (sttaus && !validStatus.includes(status)) {
+      return res.json(400).json({ error: "Please enter a valid status" });
+    }
+
+    if (status) {
+      const filtered = orders.filter((o) => o.status === status);
+      return res.json(filtered);
+    }
+
     res.json(orders);
   } catch (error) {
     next(error);
