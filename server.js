@@ -107,7 +107,7 @@ app.patch("/orders/:id", async (req, res, next) => {
 
     await saveOrders(orders);
 
-    res.json(orders[index]);
+    res.status(200).json(orders[index]);
   } catch (error) {
     next(error);
   }
