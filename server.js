@@ -70,10 +70,8 @@ app.post("/orders", async (req, res, next) => {
 
     const orders = await getOrders();
 
-    const formatId = `ORD-${String(orders.length + 1).padStart(3, "0")}`;
-
     const newOrder = {
-      id: formatId,
+      id: crypto.randomUUID(),
       customer_id,
       status: "pending",
       total,
