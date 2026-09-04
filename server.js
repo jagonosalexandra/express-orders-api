@@ -1,8 +1,10 @@
 import express from "express";
-import { readFile } from "fs/promises";
+import { readFile, writeFile } from "fs/promises";
 
 const app = express();
 const PORT = 3000;
+
+app.use(express.json());
 
 function logger(req, res, next) {
   console.log(`${req.method} ${req.url}`);
@@ -14,6 +16,10 @@ app.use(logger);
 async function getOrders() {
   const data = await readFile("./data.json", "utf-8");
   return JSON.parse(data);
+}
+
+async function saveOrder(orders) {
+  await writeFile("./data.json", JSON.stringify(orders, null, 2));
 }
 
 app.get("/orders", async (req, res, next) => {
@@ -43,6 +49,44 @@ app.get("/orders/:id", async (req, res, next) => {
       return res.status(404).json({ error: `Order with ID ${id} not found` });
 
     res.json(order);
+  } catch (error) {
+    next(error);
+  }
+});
+
+app.post("/orders", async (req, res, next) => {
+  try {
+    const { customer_id, total, items } = req.body;
+
+    if (
+      !customer_id ||
+      typeof total !== "number" ||
+      typeof items !== "number"
+    ) {
+      return res
+        .status(400)
+        .json({ error: "Missing or invalid required fields" });
+    }
+
+    const orders = await getOrders();
+
+    const formatId = `ORD-${String(orders.length + 1).padStart(3, "0")}`;
+
+    const newOrder = {
+      id: formatId,
+      customer_id,
+      status: "pending",
+      total,
+      items,
+      created: new Date().toISOString().split("T")[0],
+      shipped: null,
+      delivered: null,
+    };
+
+    orders.push(newOrder);
+    await saveOrder(orders);
+
+    res.status(201).json(newOrder);
   } catch (error) {
     next(error);
   }
