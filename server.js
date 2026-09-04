@@ -113,6 +113,22 @@ app.patch("/orders/:id", async (req, res, next) => {
   }
 });
 
+app.delete("/orders/:id", async (req, res, next) => {
+  try {
+    const orders = await getOrders();
+    const filtered = orders.filter((o) => o.id !== req.params.id);
+
+    if (filtered.length === orders.length)
+      return res.status(404).json({ error: "Error not found" });
+
+    await saveOrders(filtered);
+
+    res.status(204).json(filtered);
+  } catch (error) {
+    next(error);
+  }
+});
+
 app.use((req, res, next) => {
   res.status(404).json({ error: "Sorry can't find that" });
 });
