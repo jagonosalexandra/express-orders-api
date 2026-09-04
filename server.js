@@ -123,7 +123,7 @@ app.delete("/orders/:id", async (req, res, next) => {
 
     await saveOrders(filtered);
 
-    res.status(204).json(filtered);
+    res.status(204).send();
   } catch (error) {
     next(error);
   }
