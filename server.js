@@ -117,7 +117,7 @@ app.delete("/orders/:id", async (req, res, next) => {
     const filtered = orders.filter((o) => o.id !== req.params.id);
 
     if (filtered.length === orders.length)
-      return res.status(404).json({ error: "Error not found" });
+      return res.status(404).json({ error: "Order not found" });
 
     await saveOrders(filtered);
 
