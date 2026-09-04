@@ -18,7 +18,7 @@ async function getOrders() {
   return JSON.parse(data);
 }
 
-async function saveOrder(orders) {
+async function saveOrders(orders) {
   await writeFile("./data.json", JSON.stringify(orders, null, 2));
 }
 
@@ -84,9 +84,30 @@ app.post("/orders", async (req, res, next) => {
     };
 
     orders.push(newOrder);
-    await saveOrder(orders);
+    await saveOrders(orders);
 
     res.status(201).json(newOrder);
+  } catch (error) {
+    next(error);
+  }
+});
+
+app.patch("/orders/:id", async (req, res, next) => {
+  try {
+    const orders = await getOrders();
+    let index = orders.findIndex((o) => o.id === req.params.id);
+
+    if (index === -1) return res.status(404).json({ error: "Order not found" });
+
+    orders[index] = {
+      ...orders[index],
+      ...req.body,
+      id: orders[index].id,
+    };
+
+    await saveOrders(orders);
+
+    res.json(orders[index]);
   } catch (error) {
     next(error);
   }
