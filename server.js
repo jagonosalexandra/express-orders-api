@@ -30,6 +30,14 @@ const createOrderSchema = z.object({
   items: z.number().int().positive(),
 });
 
+const updateOrderSchema = z.object({
+  status: orderStatusSchema.optional(),
+  total: z.number().positive().optional(),
+  items: z.number().int().positive().optional(),
+  shipped: z.iso.date().nullable().optional(),
+  delivered: z.iso.date().nullable().optional(),
+});
+
 function validateBody(schema) {
   return (req, res, next) => {
     const result = schema.safeParse(req.body);
@@ -103,26 +111,31 @@ app.post("/orders", validateBody(createOrderSchema), async (req, res, next) => {
   }
 });
 
-app.patch("/orders/:id", async (req, res, next) => {
-  try {
-    const orders = await getOrders();
-    let index = orders.findIndex((o) => o.id === req.params.id);
+app.patch(
+  "/orders/:id",
+  validateBody(updateOrderSchema),
+  async (req, res, next) => {
+    try {
+      const orders = await getOrders();
+      let index = orders.findIndex((o) => o.id === req.params.id);
 
-    if (index === -1) return res.status(404).json({ error: "Order not found" });
+      if (index === -1)
+        return res.status(404).json({ error: "Order not found" });
 
-    orders[index] = {
-      ...orders[index],
-      ...req.body,
-      id: orders[index].id,
-    };
+      orders[index] = {
+        ...orders[index],
+        ...req.body,
+        id: orders[index].id,
+      };
 
-    await saveOrders(orders);
+      await saveOrders(orders);
 
-    res.status(200).json(orders[index]);
-  } catch (error) {
-    next(error);
-  }
-});
+      res.status(200).json(orders[index]);
+    } catch (error) {
+      next(error);
+    }
+  },
+);
 
 app.delete("/orders/:id", async (req, res, next) => {
   try {
