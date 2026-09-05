@@ -1,6 +1,11 @@
 import express from "express";
 import { readFile, writeFile } from "fs/promises";
 import { z } from "zod";
+import path from "path";
+import { fileURLToPath } from "url";
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 const app = express();
 
@@ -49,12 +54,15 @@ function validateBody(schema) {
 }
 
 async function getOrders() {
-  const data = await readFile("./data.json", "utf-8");
+  const data = await readFile(path.join(__dirname, "data.json"), "utf-8");
   return JSON.parse(data);
 }
 
 async function saveOrders(orders) {
-  await writeFile("./data.json", JSON.stringify(orders, null, 2));
+  await writeFile(
+    path.join(__dirname, "data.json"),
+    JSON.stringify(orders, null, 2),
+  );
 }
 
 app.get("/orders", async (req, res, next) => {
