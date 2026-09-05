@@ -1,5 +1,6 @@
 import express from "express";
 import { readFile, writeFile } from "fs/promises";
+import { z } from "zod";
 
 const app = express();
 const PORT = 3000;
@@ -12,6 +13,33 @@ function logger(req, res, next) {
 }
 
 app.use(logger);
+
+const orderStatusSchema = z.enum([
+  "pending",
+  "processing",
+  "shipped",
+  "delivered",
+  "cancelled",
+  "refunded",
+]);
+
+const createOrderSchema = z.object({
+  customer_id: z.string().min(1),
+  status: orderStatusSchema.default("pending"),
+  total: z.number().positive(),
+  items: z.number().int().positive(),
+});
+
+function validateBody(schema) {
+  return (req, res, next) => {
+    const result = schema.safeParse(req.body);
+    if (!result.success)
+      return res.status(400).json({ error: result.error.issues });
+
+    req.body = result.data;
+    next();
+  };
+}
 
 async function getOrders() {
   const data = await readFile("./data.json", "utf-8");
@@ -54,28 +82,13 @@ app.get("/orders/:id", async (req, res, next) => {
   }
 });
 
-app.post("/orders", async (req, res, next) => {
+app.post("/orders", validateBody(createOrderSchema), async (req, res, next) => {
   try {
-    const { customer_id, total, items } = req.body;
-
-    if (
-      !customer_id ||
-      typeof total !== "number" ||
-      typeof items !== "number"
-    ) {
-      return res
-        .status(400)
-        .json({ error: "Missing or invalid required fields" });
-    }
-
     const orders = await getOrders();
 
     const newOrder = {
       id: crypto.randomUUID(),
-      customer_id,
-      status: "pending",
-      total,
-      items,
+      ...req.body,
       created: new Date().toISOString().split("T")[0],
       shipped: null,
       delivered: null,
