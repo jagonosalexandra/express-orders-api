@@ -1,4 +1,4 @@
-# Orders PAI - Express, Zod & Testing
+# Orders API - Express, Zod & Testing
 
 A small Express server modeling a simple orders API using a local orders dataset. It serves order data from `data.json` with support for retrieving all orders, filtering by status, and accessing individual orders by ID.
 
