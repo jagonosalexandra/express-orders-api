@@ -23,8 +23,8 @@ This repository specifically explores the following concepts:
 ## Setup
 
 ```
-git clone git@github.com:jagonosalexandra/express-fundamentals-practice.git
-cd express-fundamentals-practice
+git clone git@github.com:jagonosalexandra/express-orders-api.git
+cd express-orders-api
 npm install
 ```
 
