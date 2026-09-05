@@ -3,7 +3,6 @@ import { readFile, writeFile } from "fs/promises";
 import { z } from "zod";
 
 const app = express();
-const PORT = 3000;
 
 app.use(express.json());
 
@@ -161,6 +160,4 @@ app.use((err, req, res, next) => {
   res.status(500).json({ error: "Something went wrong" });
 });
 
-app.listen(PORT, () => {
-  console.log(`Server running on http://localhost:${PORT}`);
-});
+export default app;
