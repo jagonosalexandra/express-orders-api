@@ -125,7 +125,6 @@ app.patch(
       orders[index] = {
         ...orders[index],
         ...req.body,
-        id: orders[index].id,
       };
 
       await saveOrders(orders);
